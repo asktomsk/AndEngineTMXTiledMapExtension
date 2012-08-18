@@ -39,8 +39,9 @@ public class TMXParser extends DefaultHandler implements TMXConstants {
 	private final TextureOptions mTextureOptions;
 	private final VertexBufferObjectManager mVertexBufferObjectManager;
 	private final ITMXTilePropertiesListener mTMXTilePropertyListener;
+    private final String mAssetBasePath;
 
-	private TMXTiledMap mTMXTiledMap;
+    private TMXTiledMap mTMXTiledMap;
 
 	private int mLastTileSetTileID;
 
@@ -66,19 +67,25 @@ public class TMXParser extends DefaultHandler implements TMXConstants {
 	// Constructors
 	// ===========================================================
 
-	public TMXParser(final AssetManager pAssetManager, final TextureManager pTextureManager, final TextureOptions pTextureOptions, final VertexBufferObjectManager pVertexBufferObjectManager, final ITMXTilePropertiesListener pTMXTilePropertyListener) {
+    public TMXParser(final AssetManager pAssetManager, final TextureManager pTextureManager, final TextureOptions pTextureOptions, final VertexBufferObjectManager pVertexBufferObjectManager, final ITMXTilePropertiesListener pTMXTilePropertyListener) {
+        this(pAssetManager, pTextureManager, pTextureOptions, pVertexBufferObjectManager, pTMXTilePropertyListener, "");
+    }
+
+
+    public TMXParser(final AssetManager pAssetManager, final TextureManager pTextureManager, final TextureOptions pTextureOptions, final VertexBufferObjectManager pVertexBufferObjectManager, final ITMXTilePropertiesListener pTMXTilePropertyListener, String assetBasePath) {
 		this.mAssetManager = pAssetManager;
 		this.mTextureManager = pTextureManager;
 		this.mTextureOptions = pTextureOptions;
 		this.mVertexBufferObjectManager = pVertexBufferObjectManager;
 		this.mTMXTilePropertyListener = pTMXTilePropertyListener;
-	}
+        this.mAssetBasePath = assetBasePath;
+    }
 
 	// ===========================================================
 	// Getter & Setter
 	// ===========================================================
 
-	TMXTiledMap getTMXTiledMap() {
+	public TMXTiledMap getTMXTiledMap() {
 		return this.mTMXTiledMap;
 	}
 
@@ -100,8 +107,14 @@ public class TMXParser extends DefaultHandler implements TMXConstants {
 			} else {
 				try {
 					final int firstGlobalTileID = SAXUtils.getIntAttribute(pAttributes, TMXConstants.TAG_TILESET_ATTRIBUTE_FIRSTGID, 1);
-					final TSXLoader tsxLoader = new TSXLoader(this.mAssetManager, this.mTextureManager, this.mTextureOptions);
-					tmxTileSet = tsxLoader.loadFromAsset(firstGlobalTileID, tsxTileSetSource);
+
+					//final TSXLoader tsxLoader = new TSXLoader(this.mAssetManager, this.mTextureManager, this.mTextureOptions);
+					//tmxTileSet = tsxLoader.loadFromAsset(firstGlobalTileID, tsxTileSetSource);
+
+                    String tsxDirPath = mAssetBasePath + tsxTileSetSource.substring(0, tsxTileSetSource.lastIndexOf("/") + 1);
+                    final TSXLoader tsxLoader = new TSXLoader(this.mAssetManager, this.mTextureManager, this.mTextureOptions, tsxDirPath);
+                    tmxTileSet = tsxLoader.loadFromAsset(firstGlobalTileID, mAssetBasePath + tsxTileSetSource);
+
 				} catch (final TSXLoadException e) {
 					throw new TMXParseException("Failed to load TMXTileSet from source: " + tsxTileSetSource, e);
 				}
@@ -110,7 +123,7 @@ public class TMXParser extends DefaultHandler implements TMXConstants {
 		} else if(pLocalName.equals(TMXConstants.TAG_IMAGE)){
 			this.mInImage = true;
 			final ArrayList<TMXTileSet> tmxTileSets = this.mTMXTiledMap.getTMXTileSets();
-			tmxTileSets.get(tmxTileSets.size() - 1).setImageSource(this.mAssetManager, this.mTextureManager, pAttributes);
+			tmxTileSets.get(tmxTileSets.size() - 1).setImageSource(this.mAssetManager, this.mTextureManager, pAttributes, mAssetBasePath);
 		} else if(pLocalName.equals(TMXConstants.TAG_TILE)) {
 			this.mInTile = true;
 			if(this.mInTileset) {

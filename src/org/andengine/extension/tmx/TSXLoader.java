@@ -36,18 +36,24 @@ public class TSXLoader {
 	private final AssetManager mAssetManager;
 	private final TextureManager mTextureManager;
 	private final TextureOptions mTextureOptions;
+    private final String mAssetBasePath;
 
-	// ===========================================================
+    // ===========================================================
 	// Constructors
 	// ===========================================================
 
 	public TSXLoader(final AssetManager pAssetManager, final TextureManager pTextureManager, final TextureOptions pTextureOptions) {
-		this.mAssetManager = pAssetManager;
-		this.mTextureManager = pTextureManager;
-		this.mTextureOptions = pTextureOptions;
+        this(pAssetManager, pTextureManager, pTextureOptions, "");
 	}
 
-	// ===========================================================
+    public TSXLoader(AssetManager pAssetManager, TextureManager pTextureManager, TextureOptions pTextureOptions, String pAssetBasePath) {
+        this.mAssetManager = pAssetManager;
+        this.mTextureManager = pTextureManager;
+        this.mTextureOptions = pTextureOptions;
+        mAssetBasePath = pAssetBasePath;
+    }
+
+    // ===========================================================
 	// Getter & Setter
 	// ===========================================================
 
@@ -73,7 +79,7 @@ public class TSXLoader {
 			final SAXParser sp = spf.newSAXParser();
 
 			final XMLReader xr = sp.getXMLReader();
-			final TSXParser tsxParser = new TSXParser(this.mAssetManager, this.mTextureManager, this.mTextureOptions, pFirstGlobalTileID);
+			final TSXParser tsxParser = new TSXParser(this.mAssetManager, this.mTextureManager, this.mTextureOptions, pFirstGlobalTileID, mAssetBasePath);
 			xr.setContentHandler(tsxParser);
 
 			xr.parse(new InputSource(new BufferedInputStream(pInputStream)));

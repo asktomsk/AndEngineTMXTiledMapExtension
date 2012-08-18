@@ -27,8 +27,9 @@ public class TMXObject implements TMXConstants {
 	private final int mWidth;
 	private final int mHeight;
 	private final TMXProperties<TMXObjectProperty> mTMXObjectProperties = new TMXProperties<TMXObjectProperty>();
+    private final int mGlobalTileId;
 
-	// ===========================================================
+    // ===========================================================
 	// Constructors
 	// ===========================================================
 
@@ -39,7 +40,9 @@ public class TMXObject implements TMXConstants {
 		this.mY = SAXUtils.getIntAttributeOrThrow(pAttributes, TMXConstants.TAG_OBJECT_ATTRIBUTE_Y);
 		this.mWidth = SAXUtils.getIntAttribute(pAttributes, TMXConstants.TAG_OBJECT_ATTRIBUTE_WIDTH, 0);
 		this.mHeight = SAXUtils.getIntAttribute(pAttributes, TMXConstants.TAG_OBJECT_ATTRIBUTE_HEIGHT, 0);
-	}
+        this.mGlobalTileId = SAXUtils.getIntAttribute(pAttributes, TAG_TILE_ATTRIBUTE_GID, 0);
+
+    }
 
 	// ===========================================================
 	// Getter & Setter
@@ -88,4 +91,8 @@ public class TMXObject implements TMXConstants {
 	// ===========================================================
 	// Inner and Anonymous Classes
 	// ===========================================================
+
+    public int getGlobalTileId() {
+        return mGlobalTileId;
+    }
 }

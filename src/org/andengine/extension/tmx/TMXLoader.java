@@ -40,8 +40,9 @@ public class TMXLoader {
 	private final TextureOptions mTextureOptions;
 	private final VertexBufferObjectManager mVertexBufferObjectManager;
 	private final ITMXTilePropertiesListener mTMXTilePropertyListener;
+    private String mAssetBasePath = "";
 
-	// ===========================================================
+    // ===========================================================
 	// Constructors
 	// ===========================================================
 
@@ -85,6 +86,11 @@ public class TMXLoader {
 		this.mTMXTilePropertyListener = pTMXTilePropertyListener;
 	}
 
+    public TMXLoader(AssetManager pAssetManager, TextureManager pTextureManager, VertexBufferObjectManager pVertexBufferObjectManager, final String pAssetBasePath) {
+        this(pAssetManager, pTextureManager, pVertexBufferObjectManager);
+        mAssetBasePath = pAssetBasePath;
+    }
+
 	// ===========================================================
 	// Getter & Setter
 	// ===========================================================
@@ -97,35 +103,38 @@ public class TMXLoader {
 	// Methods
 	// ===========================================================
 
-	public TMXTiledMap loadFromAsset(final String pAssetPath) throws TMXLoadException {
-		try {
-			return this.load(this.mAssetManager.open(pAssetPath));
-		} catch (final IOException e) {
-			throw new TMXLoadException("Could not load TMXTiledMap from asset: " + pAssetPath, e);
-		}
-	}
+    public TMXTiledMap loadFromAsset(final Context pContext, final String pAssetPath) throws TMXLoadException {
+        try {
+            return load(pContext.getAssets().open(mAssetBasePath + pAssetPath));
+        } catch (final IOException e) {
+            throw new TMXLoadException("Could not load TMXTiledMap from asset: " + mAssetBasePath + pAssetPath, e);
+        }
+        catch (Exception e) {
+            return null;
+        }
+    }
 
-	public TMXTiledMap load(final InputStream pInputStream) throws TMXLoadException {
-		try {
-			final SAXParserFactory spf = SAXParserFactory.newInstance();
-			final SAXParser sp = spf.newSAXParser();
+    public TMXTiledMap load(final InputStream pInputStream) throws TMXLoadException {
+        try {
+            final SAXParserFactory spf = SAXParserFactory.newInstance();
+            final SAXParser sp = spf.newSAXParser();
 
-			final XMLReader xr = sp.getXMLReader();
-			final TMXParser tmxParser = new TMXParser(this.mAssetManager, this.mTextureManager, this.mTextureOptions, this.mVertexBufferObjectManager, this.mTMXTilePropertyListener);
-			xr.setContentHandler(tmxParser);
+            final XMLReader xr = sp.getXMLReader();
+            final TMXParser tmxParser = new TMXParser(this.mAssetManager, this.mTextureManager, this.mTextureOptions, this.mVertexBufferObjectManager, this.mTMXTilePropertyListener, mAssetBasePath);
+            xr.setContentHandler(tmxParser);
 
-			xr.parse(new InputSource(new BufferedInputStream(pInputStream)));
+            xr.parse(new InputSource(new BufferedInputStream(pInputStream)));
 
-			return tmxParser.getTMXTiledMap();
-		} catch (final SAXException e) {
-			throw new TMXLoadException(e);
-		} catch (final ParserConfigurationException pe) {
+            return tmxParser.getTMXTiledMap();
+        } catch (final SAXException e) {
+            throw new TMXLoadException(e);
+        } catch (final ParserConfigurationException pe) {
 			/* Doesn't happen. */
-			return null;
-		} catch (final IOException e) {
-			throw new TMXLoadException(e);
-		}
-	}
+            return null;
+        } catch (final IOException e) {
+            throw new TMXLoadException(e);
+        }
+    }
 
 	// ===========================================================
 	// Inner and Anonymous Classes

@@ -46,19 +46,25 @@ public class TSXParser extends DefaultHandler implements TMXConstants {
 	@SuppressWarnings("unused")
 	private boolean mInProperty;
 	private final int mFirstGlobalTileID;
+    private final String mAssetBasePath;
 
-	// ===========================================================
+    // ===========================================================
 	// Constructors
 	// ===========================================================
 
 	public TSXParser(final AssetManager pAssetManager, final TextureManager pTextureManager, final TextureOptions pTextureOptions, final int pFirstGlobalTileID) {
-		this.mAssetManager = pAssetManager;
-		this.mTextureManager = pTextureManager;
-		this.mTextureOptions = pTextureOptions;
-		this.mFirstGlobalTileID = pFirstGlobalTileID;
+        this(pAssetManager, pTextureManager, pTextureOptions, pFirstGlobalTileID, "");
 	}
 
-	// ===========================================================
+    public TSXParser(final AssetManager pAssetManager, final TextureManager pTextureManager, final TextureOptions pTextureOptions, final int pFirstGlobalTileID, String pAssetBasePath) {
+        this.mAssetManager = pAssetManager;
+        this.mTextureManager = pTextureManager;
+        this.mTextureOptions = pTextureOptions;
+        this.mFirstGlobalTileID = pFirstGlobalTileID;
+        this.mAssetBasePath = pAssetBasePath;
+    }
+
+    // ===========================================================
 	// Getter & Setter
 	// ===========================================================
 
@@ -77,7 +83,7 @@ public class TSXParser extends DefaultHandler implements TMXConstants {
 			this.mTMXTileSet = new TMXTileSet(this.mFirstGlobalTileID, pAttributes, this.mTextureOptions);
 		} else if(pLocalName.equals(TMXConstants.TAG_IMAGE)){
 			this.mInImage = true;
-			this.mTMXTileSet.setImageSource(this.mAssetManager, this.mTextureManager, pAttributes);
+			this.mTMXTileSet.setImageSource(this.mAssetManager, this.mTextureManager, pAttributes, mAssetBasePath);
 		} else if(pLocalName.equals(TMXConstants.TAG_TILE)) {
 			this.mInTile = true;
 			this.mLastTileSetTileID = SAXUtils.getIntAttributeOrThrow(pAttributes, TMXConstants.TAG_TILE_ATTRIBUTE_ID);
